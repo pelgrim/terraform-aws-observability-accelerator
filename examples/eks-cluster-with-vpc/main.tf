@@ -18,6 +18,7 @@ provider "helm" {
 
 data "aws_eks_cluster_auth" "this" {
   name = module.eks_blueprints.eks_cluster_id
+
 }
 
 data "aws_availability_zones" "available" {}
@@ -34,6 +35,7 @@ locals {
     Blueprint  = local.name
     GithubRepo = "github.com/aws-observability/terraform-aws-observability-accelerator"
   }
+
 }
 
 #---------------------------------------------------------------
@@ -116,4 +118,16 @@ module "vpc" {
   }
 
   tags = local.tags
+}
+
+#### module fluentbit_opensearch
+module "fluentbit_opensearch" {
+  source = "../../modules/eks-monitoring/fluentbit_opensearch"
+  eks_cluster_id                 = module.eks_blueprints.eks_cluster_id
+  vpc_cidr_block                 = var.vpc_cidr_block
+  public_subnets                 = var.public_subnets
+  opensearch_dashboard_user      = var.opensearch_dashboard_user
+  opensearch_dashboard_pw        = var.opensearch_dashboard_pw
+  create_iam_service_linked_role = var.create_iam_service_linked_role
+  vpc_id                         = var.vpc_id
 }
