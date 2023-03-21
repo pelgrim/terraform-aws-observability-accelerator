@@ -7,7 +7,6 @@ variable "create_iam_service_linked_role" {
 variable "aws_region" {
   description = "AWS Region"
   type        = string
-  default     = "us-east-1"
 }
 
 variable "vpc_id" {
@@ -25,7 +24,7 @@ variable "vpc_cidr_block" {
   type        = string
 }
 
-variable "public_subnets" {
+variable "private_subnets" {
   description = "VPC cidr"
   type        = list
 }
@@ -39,4 +38,10 @@ variable "opensearch_dashboard_pw" {
   description = "OpenSearch dashboard user password"
   type        = string
   sensitive   = true
+}
+
+variable "enable_argocd" {
+  description = "Enable argocd"
+  type = bool
+  default = true
 }

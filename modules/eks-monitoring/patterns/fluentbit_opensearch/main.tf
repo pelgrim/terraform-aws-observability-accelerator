@@ -2,16 +2,34 @@ data "aws_eks_cluster" "this" {
   name = var.eks_cluster_id
 }
 
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.this.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.this.token
+}
+
+provider "helm" {
+  kubernetes {
+  host                   = data.aws_eks_cluster.this.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.this.token
+  }
+}
+
+data "aws_eks_cluster_auth" "this" {
+  name = var.eks_cluster_id
+}
+
 module "eks_blueprints_kubernetes_addons" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints/modules/kubernetes-addons"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.13.1"
 
     eks_cluster_id = var.eks_cluster_id
 
-enable_argocd             = true
+enable_argocd             = var.enable_argocd
   argocd_applications = {
     workloads = {
       path               = "envs/dev"
-      repo_url           = "https://github.com/aws-samples/eks-blueprints-workloads.git"
+      repo_url           = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.13.1"
       add_on_application = false
     }
   }
@@ -26,6 +44,26 @@ enable_argocd             = true
   }
 }
 
+data "aws_iam_policy_document" "example" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+
+    actions   = ["es:*"]
+    resources = ["arn:aws:es:${var.aws_region}:${data.aws_caller_identity.current.account_id}:domain/example/*"]
+
+    condition {
+      test     = "IpAddress"
+      variable = "aws:SourceIp"
+      values   = [var.vpc_cidr_block, "0.0.0.0/0"]
+    }
+  }
+}
+
 #---------------------------------------------------------------
 # Provision OpenSearch and Allow Access
 #---------------------------------------------------------------
@@ -36,12 +74,12 @@ resource "aws_elasticsearch_domain" "opensearch" {
 
   cluster_config {
     instance_type          = "m6g.large.elasticsearch"
-    instance_count         = 3
-    zone_awareness_enabled = true
+    instance_count         = 1
+    zone_awareness_enabled = false
 
-    zone_awareness_config {
-      availability_zone_count = 3
-    }
+    # zone_awareness_config {
+    #   availability_zone_count = 1
+    # }
   }
 
   node_to_node_encryption {
@@ -63,7 +101,7 @@ resource "aws_elasticsearch_domain" "opensearch" {
   }
 
   advanced_security_options {
-    enabled                        = false
+    enabled                        = true
     internal_user_database_enabled = true
 
     master_user_options {
@@ -73,7 +111,7 @@ resource "aws_elasticsearch_domain" "opensearch" {
   }
 
   vpc_options {
-    subnet_ids         = var.public_subnets
+    subnet_ids         = var.private_subnets
     security_group_ids = [aws_security_group.opensearch_access.id]
   }
 
@@ -82,6 +120,20 @@ resource "aws_elasticsearch_domain" "opensearch" {
   ]
 
   tags = local.tags
+
+  access_policies = <<CONFIG
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": "es:*",
+            "Principal": "*",
+            "Effect": "Allow",
+            "Resource": "arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/opensearch/*"
+        }
+    ]
+}
+CONFIG
 }
 
 resource "aws_iam_service_linked_role" "opensearch" {
@@ -90,15 +142,15 @@ resource "aws_iam_service_linked_role" "opensearch" {
 }
 
 resource "aws_iam_policy" "fluentbit_opensearch_access" {
-  name        = "fluentbit_opensearch_access"
+  name        = "fluentbit_opensearch_access1"
   description = "IAM policy to allow Fluentbit access to OpenSearch"
   policy      = data.aws_iam_policy_document.fluentbit_opensearch_access.json
 }
 
-resource "aws_elasticsearch_domain_policy" "opensearch_access_policy" {
-  domain_name     = aws_elasticsearch_domain.opensearch.domain_name
-  access_policies = data.aws_iam_policy_document.opensearch_access_policy.json
-}
+# resource "aws_elasticsearch_domain_policy" "opensearch_access_policy" {
+#   domain_name     = aws_elasticsearch_domain.opensearch.domain_name
+#     access_policies = data.aws_iam_policy_document.example.json
+# }
 
 resource "aws_security_group" "opensearch_access" {
   vpc_id      = var.vpc_id
