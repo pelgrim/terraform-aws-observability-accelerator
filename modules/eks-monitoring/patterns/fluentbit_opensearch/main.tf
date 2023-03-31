@@ -23,16 +23,7 @@ data "aws_eks_cluster_auth" "this" {
 module "eks_blueprints_kubernetes_addons" {
   source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.13.1"
 
-    eks_cluster_id = var.eks_cluster_id
-
-enable_argocd             = var.enable_argocd
-  argocd_applications = {
-    workloads = {
-      path               = "envs/dev"
-      repo_url           = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.13.1"
-      add_on_application = false
-    }
-  }
+  eks_cluster_id = var.eks_cluster_id
 
   enable_aws_for_fluentbit        = true
   aws_for_fluentbit_irsa_policies = [aws_iam_policy.fluentbit_opensearch_access.arn]

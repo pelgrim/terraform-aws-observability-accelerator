@@ -39,9 +39,3 @@ variable "opensearch_dashboard_pw" {
   type        = string
   sensitive   = true
 }
-
-variable "enable_argocd" {
-  description = "Enable argocd"
-  type = bool
-  default = true
-}
