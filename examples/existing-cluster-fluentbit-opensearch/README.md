@@ -42,13 +42,18 @@ Add your cluster name for `cluster_name="..."` to the `terraform.tfvars` or use 
 Add your cluster VPC id for `vpc_id="..."` to the `terraform.tfvars` or use an environment variable `export TF_VAR_vpc_id=xxx`.
 Add your cluster VPC private subnets for `private_subnets=["<SUBNET_ID_1>","<SUBNET_ID_2>","<SUBNET_ID_3>"]` to the `terraform.tfvars` or use an environment variable `export TF_VAR_private_subnets='["<SUBNET_ID_1>","<SUBNET_ID_2>","<SUBNET_ID_3>"]'`.
 
-4. Amazon Managed Grafana workspace
+4. Existing Amazon Managed Grafana workspace
 
 To run this example you need an Amazon Managed Grafana workspace. If you have an existing workspace, create an environment variable `export TF_VAR_managed_grafana_workspace_id=g-xxx`.
 To create a new one, visit our Amazon Managed Grafana [documentation](https://docs.aws.amazon.com/grafana/latest/userguide/getting-started-with-AMG.html).
 Make sure to provide the workspace with Amazon Managed Service for Prometheus read permissions.
 
 > In the URL `https://g-xyz.grafana-workspace.eu-central-1.amazonaws.com`, the workspace ID would be `g-xyz`
+
+The OpenSearch domain is created within the EKS cluster VPC. Hence the Grafana workspace need to be configured to use the same VPC.
+To learn how to configure an Outbound VPC connection, visit our Amazon Managed Grafana [documentation](https://docs.aws.amazon.com/grafana/latest/userguide/AMG-configure-vpc.html#config-vpc-use).
+Once you configure the VPC in the Grafana workspace, you may need to create VPC Endpoints for AWS services such as CloudWatch and Amazon Managed Service for Prometheus.
+To learn how to configure VPC Endpoints, visit our AWS PrivateLink [documentation](https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html).
 
 5. <a name="apikey"></a> Grafana API Key
 
