@@ -38,7 +38,7 @@ To run this example, you need to provide your EKS cluster name.
 If you don't have a cluster ready, visit [this example](https://github.com/aws-ia/terraform-aws-eks-blueprints/tree/v4.13.1/examples/eks-cluster-with-new-vpc)
 first to create a new one.
 
-Add your cluster name for `eks_cluster_id="..."` to the `terraform.tfvars` or use an environment variable `export TF_VAR_eks_cluster_id=xxx`.
+Add your cluster name for `cluster_name="..."` to the `terraform.tfvars` or use an environment variable `export TF_VAR_cluster_name=xxx`.
 Add your cluster VPC id for `vpc_id="..."` to the `terraform.tfvars` or use an environment variable `export TF_VAR_vpc_id=xxx`.
 Add your cluster VPC private subnets for `private_subnets=["<SUBNET_ID_1>","<SUBNET_ID_2>","<SUBNET_ID_3>"]` to the `terraform.tfvars` or use an environment variable `export TF_VAR_private_subnets='["<SUBNET_ID_1>","<SUBNET_ID_2>","<SUBNET_ID_3>"]'`.
 
@@ -71,6 +71,8 @@ or if you had setup environment variables, run
 ```sh
 terraform apply
 ```
+
+Inform a valid password and username for OpenSearch master user. A valid password must contain at least eight characters, uppercase letters, lowercase letters, numbers, and symbols.
 
 ## Additional configuration
 

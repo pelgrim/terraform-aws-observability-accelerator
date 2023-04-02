@@ -59,3 +59,14 @@ variable "opensearch_dashboard_pw" {
   type        = string
   sensitive   = true
 }
+
+variable "managed_grafana_workspace_id" {
+  description = "Amazon Managed Grafana existing workspace id"
+  type        = string
+}
+
+variable "grafana_api_key" {
+  description = "Amazon Managed Grafana existing workspace id"
+  type        = string
+  sensitive   = true
+}
