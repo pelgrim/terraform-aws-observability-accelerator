@@ -32,37 +32,41 @@ cd examples/existing-cluster-fluentbit-opensearch
 terraform init
 ```
 
-3. Amazon EKS Cluster
+3. Existing Amazon EKS Cluster
 
-To run this example, you need to provide your EKS cluster name.
-If you don't have a cluster ready, visit [this example](https://github.com/aws-ia/terraform-aws-eks-blueprints/tree/v4.13.1/examples/eks-cluster-with-new-vpc)
-first to create a new one.
+    To run this example, you need to provide your EKS cluster name.
+    If you don't have a cluster ready, visit [this example](https://github.com/aws-ia/terraform-aws-eks-blueprints/tree/v4.13.1/examples/eks-cluster-with-new-vpc)
+    first to create a new one.
 
-Add your cluster name for `cluster_name="..."` to the `terraform.tfvars` or use an environment variable `export TF_VAR_cluster_name=xxx`.
-Add your cluster VPC id for `vpc_id="..."` to the `terraform.tfvars` or use an environment variable `export TF_VAR_vpc_id=xxx`.
-Add your cluster VPC private subnets for `private_subnets=["<SUBNET_ID_1>","<SUBNET_ID_2>","<SUBNET_ID_3>"]` to the `terraform.tfvars` or use an environment variable `export TF_VAR_private_subnets='["<SUBNET_ID_1>","<SUBNET_ID_2>","<SUBNET_ID_3>"]'`.
+    Add your cluster name for `cluster_name="..."` to the `terraform.tfvars` or use an environment variable `export TF_VAR_cluster_name=xxx`.
 
-4. Existing Amazon Managed Grafana workspace
+4. VPC
 
-To run this example you need an Amazon Managed Grafana workspace. If you have an existing workspace, create an environment variable `export TF_VAR_managed_grafana_workspace_id=g-xxx`.
-To create a new one, visit our Amazon Managed Grafana [documentation](https://docs.aws.amazon.com/grafana/latest/userguide/getting-started-with-AMG.html).
-Make sure to provide the workspace with Amazon Managed Service for Prometheus read permissions.
+    Add your cluster VPC id for `vpc_id="..."` to the `terraform.tfvars` or use an environment variable `export TF_VAR_vpc_id=xxx`.
 
-> In the URL `https://g-xyz.grafana-workspace.eu-central-1.amazonaws.com`, the workspace ID would be `g-xyz`
+    Add your cluster VPC private subnets for `private_subnets=["<SUBNET_ID_1>","<SUBNET_ID_2>","<SUBNET_ID_3>"]` to the `terraform.tfvars` or use an environment variable `export TF_VAR_private_subnets='["<SUBNET_ID_1>","<SUBNET_ID_2>","<SUBNET_ID_3>"]'`.
 
-The OpenSearch domain is created within the EKS cluster VPC. Hence the Grafana workspace need to be configured to use the same VPC.
-To learn how to configure an Outbound VPC connection, visit our Amazon Managed Grafana [documentation](https://docs.aws.amazon.com/grafana/latest/userguide/AMG-configure-vpc.html#config-vpc-use).
-Once you configure the VPC in the Grafana workspace, you may need to create VPC Endpoints for AWS services such as CloudWatch and Amazon Managed Service for Prometheus.
-To learn how to configure VPC Endpoints, visit our AWS PrivateLink [documentation](https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html).
+5. Existing Amazon Managed Grafana workspace
 
-5. <a name="apikey"></a> Grafana API Key
+    To run this example you need an Amazon Managed Grafana workspace. If you have an existing workspace, create an environment variable `export TF_VAR_managed_grafana_workspace_id=g-xxx`.
+    To create a new one, visit our Amazon Managed Grafana [documentation](https://docs.aws.amazon.com/grafana/latest/userguide/getting-started-with-AMG.html).
+    Make sure to provide the workspace with Amazon Managed Service for Prometheus read permissions.
 
-Amazon Managed Service for Grafana provides a control plane API for generating Grafana API keys. We will provide to Terraform
-a short lived API key to run the `apply` or `destroy` command.
-Ensure you have necessary IAM permissions (`CreateWorkspaceApiKey, DeleteWorkspaceApiKey`)
+    In the URL `https://g-xyz.grafana-workspace.eu-central-1.amazonaws.com`, the workspace ID would be `g-xyz`
+
+    Grafana workspace need to be configured to use the same VPC as the OpenSearch domain.
+    To learn how to configure an Outbound VPC connection, visit our Amazon Managed Grafana [documentation](https://docs.aws.amazon.com/grafana/latest/userguide/AMG-configure-vpc.html#config-vpc-use).
+    
+6. <a name="apikey"></a> Grafana API Key
+
+    Amazon Managed Service for Grafana provides a control plane API for generating Grafana API keys. We will provide to Terraform a short lived API key to run the `apply` or `destroy` command.
+    Ensure you have necessary IAM permissions (`CreateWorkspaceApiKey, DeleteWorkspaceApiKey`)
 
 ```sh
-export TF_VAR_grafana_api_key=`aws grafana create-workspace-api-key --key-name "observability-accelerator-$(date +%s)" --key-role ADMIN --seconds-to-live 1200 --workspace-id $TF_VAR_managed_grafana_workspace_id --query key --output text`
+export TF_VAR_grafana_api_key=`aws grafana create-workspace-api-key \
+  --key-name "observability-accelerator-$(date +%s)" --key-role ADMIN \
+  --seconds-to-live 1200 --workspace-id $TF_VAR_managed_grafana_workspace_id \
+  --query key --output text`
 ```
 
 ## Deploy
@@ -91,7 +95,7 @@ Specify the AWS Region where the resources will be deployed. Edit the `terraform
 
 1. OpenSearch datasource on Grafana
 
-After the deployment, run the following commands to grant access for EKS and Grafana into OpenSearch.
+    After the deployment, run the following commands to grant access for EKS and Grafana into OpenSearch.
 
 ```bash
 payload='{
@@ -119,3 +123,8 @@ kubectl run -i curl --image=curlimages/curl --restart=Never --rm=true \
      -H "Content-Type: application/json" \
      --data "$payload" "${rolesmapping_url}/security_manager"
 ```
+
+2. Grafana access to AWS Datasources
+
+    Once you configure the VPC in the Grafana workspace, you may need to create VPC Endpoints for AWS services such as CloudWatch and Amazon Managed Service for Prometheus.
+    To learn how to configure VPC Endpoints, visit our AWS PrivateLink [documentation](https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html).
