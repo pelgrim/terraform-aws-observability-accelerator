@@ -37,6 +37,8 @@ No resources.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS Region | `string` | n/a | yes |
+| <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | Existing VPC id | `string` | "" | no |
+| <a name="input_private_subnets"></a> [input\_private\_subnets](#input\_private\_subnets) | Existing VPC private subnets | `list(string)` | []| no |
 
 ## Outputs
 

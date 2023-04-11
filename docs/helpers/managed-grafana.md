@@ -30,6 +30,19 @@ Specify the AWS Region where the resources will be deployed:
 export TF_VAR_aws_region=xxx
 ```
 
+### 3. Existing VPC (Optional)
+
+To grant Grafana access to a Datasource inside a existing VPC, define the following
+variables and configure Grafana inside this VPC, specifying to which VPC the
+workspace will be connected, and to which private subnets from this same VPC.
+It will also create VPC endpoints to CloudWatch Metrics, CloudWatch Logs, X-Ray,
+Amazon Managed Service for Prometheus, and OpenSearch, for the same region.
+
+```bash
+export TF_VAR_vpc_id=xxx
+export TF_VAR_private_subnets='["xxx","xxx"]'
+```
+
 ## Deploy
 
 Simply run this command to deploy the example
