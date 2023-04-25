@@ -48,14 +48,17 @@ terraform init
 
 5. Existing Amazon Managed Grafana workspace
 
-    To run this example you need an Amazon Managed Grafana workspace. If you have an existing workspace, create an environment variable `export TF_VAR_managed_grafana_workspace_id=g-xxx`.
-    To create a new one, visit our Amazon Managed Grafana [documentation](https://docs.aws.amazon.com/grafana/latest/userguide/getting-started-with-AMG.html).
-    Make sure to provide the workspace with Amazon Managed Service for Prometheus read permissions.
-
-    In the URL `https://g-xyz.grafana-workspace.eu-central-1.amazonaws.com`, the workspace ID would be `g-xyz`
-
-    Grafana workspace need to be configured to use the same VPC as the OpenSearch domain.
-    To learn how to configure an Outbound VPC connection, visit our Amazon Managed Grafana [documentation](https://docs.aws.amazon.com/grafana/latest/userguide/AMG-configure-vpc.html#config-vpc-use).
+    To run this example you need an Amazon Managed Grafana workspace,
+    with Outbound VPC configured with the same VPC from OpenSearch.
+    To learn how to configure it, refer to [this documentation](https://docs.aws.amazon.com/grafana/latest/userguide/AMG-configure-vpc.html#config-vpc-use).
+    
+    If you need to create a new Amazon Managed Grafana workspace, follow [these instructions](https://aws-observability.github.io/terraform-aws-observability-accelerator/).
+    
+    Once you have a configure workspace, create an environment variable as bellow:
+    ```
+    export TF_VAR_managed_grafana_workspace_id=g-xxx
+    ```
+    For example, in the URL `https://g-xyz.grafana-workspace.eu-central-1.amazonaws.com`, the workspace ID is `g-xyz`.
     
 6. <a name="apikey"></a> Grafana API Key
 
@@ -119,7 +122,7 @@ kubectl run -i curl --image=curlimages/curl --restart=Never --rm=true \
      --data "$payload" "${rolesmapping_url}/all_access"
 
 kubectl run -i curl --image=curlimages/curl --restart=Never --rm=true \
-  -- -s -XPUT -u '<MASTER_USERNAME>:<MASTER_PASSWORD>' \
+  -- -s -XPUT -u '<MASTER_USERNAME>:<MASTER_PASSWORD>'\
      -H "Content-Type: application/json" \
      --data "$payload" "${rolesmapping_url}/security_manager"
 ```
@@ -128,3 +131,12 @@ kubectl run -i curl --image=curlimages/curl --restart=Never --rm=true \
 
     Once you configure the VPC in the Grafana workspace, you may need to create VPC Endpoints for AWS services such as CloudWatch and Amazon Managed Service for Prometheus.
     To learn how to configure VPC Endpoints, visit our AWS PrivateLink [documentation](https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html).
+    
+
+## Cleanup
+
+To clean up your environment, destroy the Terraform example by running
+
+```sh
+terraform destroy
+```

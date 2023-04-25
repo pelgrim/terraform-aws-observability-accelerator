@@ -40,7 +40,7 @@ module "managed_grafana" {
   account_access_type       = "CURRENT_ACCOUNT"
   authentication_providers  = ["AWS_SSO"]
   permission_type           = "SERVICE_MANAGED"
-  data_sources              = ["CLOUDWATCH", "PROMETHEUS", "XRAY"]
+  data_sources              = ["CLOUDWATCH", "PROMETHEUS", "XRAY", "AMAZON_OPENSEARCH_SERVICE"]
   notification_destinations = ["SNS"]
   stack_set_name            = local.name
 

@@ -63,10 +63,18 @@ variable "opensearch_dashboard_pw" {
 variable "managed_grafana_workspace_id" {
   description = "Amazon Managed Grafana existing workspace id"
   type        = string
+  default     = ""
 }
 
 variable "grafana_api_key" {
   description = "Amazon Managed Grafana existing workspace id"
   type        = string
   sensitive   = true
+  default = ""
+}
+
+variable "create_grafana_workspace" {
+  description = "Create a new Amazon Managed Grafana workspace and configure VPC"
+  type = bool
+  default = false
 }

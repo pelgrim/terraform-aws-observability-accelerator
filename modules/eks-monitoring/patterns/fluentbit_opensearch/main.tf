@@ -65,8 +65,8 @@ resource "aws_elasticsearch_domain" "opensearch" {
 
   cluster_config {
     instance_type          = "m6g.large.elasticsearch"
-    instance_count         = 1
-    zone_awareness_enabled = false
+    instance_count         = length(var.private_subnets)
+    zone_awareness_enabled = true
 
     # zone_awareness_config {
     #   availability_zone_count = 1
