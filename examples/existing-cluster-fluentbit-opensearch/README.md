@@ -53,6 +53,7 @@ terraform init
     To learn how to configure it, refer to [this documentation](https://docs.aws.amazon.com/grafana/latest/userguide/AMG-configure-vpc.html#config-vpc-use).
     
     If you need to create a new Amazon Managed Grafana workspace, follow [these instructions](https://aws-observability.github.io/terraform-aws-observability-accelerator/).
+    Make sure to follow the optional instructions for Existing VPC.
     
     Once you have a configure workspace, create an environment variable as bellow:
     ```
@@ -138,5 +139,7 @@ kubectl run -i curl --image=curlimages/curl --restart=Never --rm=true \
 To clean up your environment, destroy the Terraform example by running
 
 ```sh
+export TF_VAR_managed_grafana_workspace_id=<GRAFANA WORKSPACE ID>
+export TF_VAR_grafana_api_key=`aws grafana create-workspace-api-key --key-name "observability-accelerator-$(date +%s)" --key-role ADMIN --seconds-to-live 1200 --workspace-id $TF_VAR_managed_grafana_workspace_id --query key --output text` 
 terraform destroy
 ```
